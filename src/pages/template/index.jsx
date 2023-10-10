@@ -23,8 +23,9 @@ export default function Template() {
   return (
     <>
       {showMenu ? (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
-          <div className="bg-zinc-800 h-full p-4 px-8 w-full lg:w-1/3 flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col lg:flex-row z-50">
+          <div className="flex-1 lg:hidden"></div>
+          <div className="flex-1 bg-zinc-800 lg:h-full p-4 lg:px-8 w-full lg:w-1/3 flex flex-col">
             <div className="flex justify-between items-center text-lg lg:text-3xl  pb-3  border-b-2 border-zinc-700">
               <div className="flex items-center">
                 <AiFillAppstore className="mr-2" />
@@ -70,7 +71,7 @@ export default function Template() {
             onClick={() => {
               setShowMenu(false);
             }}
-            className="flex flex-1 h-full"
+            className="hidden lg:flex lg:flex-1 lg:h-full"
           ></div>
         </div>
       ) : null}
