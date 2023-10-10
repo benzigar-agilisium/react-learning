@@ -58,7 +58,7 @@ export default function Shopping() {
       </div>
       <div className="mt-4 flex flex-wrap">
         {products?.map((e) => (
-          <div className="w-1/4 hover:bg-zinc-900 rounded-md pr-3 mb-5">
+          <div className="w-full lg:w-1/4 hover:bg-zinc-900 rounded-md pr-3 mb-5">
             <div className="relative">
               <div className="absolute top-0 right-0">
                 {isInCart(e.id) ? (

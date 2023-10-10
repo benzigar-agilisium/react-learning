@@ -17,21 +17,21 @@ const Home = () => {
   return (
     <div className="flex flex-col flex-1">
       <div className="px-3 py- mt-5 container mx-auto">
-        <h1 className="font-bold text-3xl">Pick the App,</h1>
-        <div className="mt-5 flex items-center">
-          <Link to={"/emi"} className="w-1/4 pr-2">
+        <h1 className="font-bold text-xl lg:text-3xl">Pick the App,</h1>
+        <div className="mt-5 flex flex-wrap items-center">
+          <Link to={"/emi"} className="w-full  mb-2 lg:w-1/4 pr-2">
             <div className="bg-zinc-800 hover:bg-zinc-900 cursor-pointer p-5 py-10 px-8 rounded-md">
               <FaRegMoneyBill1 className="text-5xl" />
               <p className="font-bold mt-5">EMI Calculator</p>
             </div>
           </Link>
-          <Link to={"/gallery"} className="w-1/4 pr-2">
+          <Link to={"/gallery"} className="w-full mb-2  lg:w-1/4 pr-2">
             <div className="bg-zinc-800 hover:bg-zinc-900 cursor-pointer p-5 py-10 px-8 rounded-md">
               <FaVideo className="text-5xl" />
               <p className="font-bold mt-5">Video Gallery</p>
             </div>
           </Link>
-          <Link to={"/shopping"} className="w-1/4 pr-2">
+          <Link to={"/shopping"} className="w-full mb-2  lg:w-1/4 pr-2">
             <div className="bg-zinc-800 hover:bg-zinc-900 cursor-pointer p-5 py-10 px-8 rounded-md">
               <AiOutlineShop className="text-5xl" />
               <p className="font-bold mt-5">Shopping Cart</p>

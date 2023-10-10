@@ -32,8 +32,8 @@ const EmiCalculator = () => {
 
   return (
     <>
-      <div className="mt-10 flex container mx-auto px-5">
-        <div className="w-1/3">
+      <div className="mt-10 flex flex-wrap container mx-auto px-5">
+        <div className="w-full lg:w-1/3">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -91,7 +91,7 @@ const EmiCalculator = () => {
           </form>
         </div>
         {result.emi ? (
-          <div className="pl-10 flex flex-col">
+          <div className="mt-5 lg:mt-0 lg:pl-10 flex flex-col">
             <h1 className="font-bold text-xl">Result : </h1>
             <div className="mt-2 bg-zinc-800 p-5 rounded-md flex flex-col">
               <h1 className="font-bold text-xl">

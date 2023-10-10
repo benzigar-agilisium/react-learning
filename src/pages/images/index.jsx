@@ -185,7 +185,7 @@ export default function ImageGallery() {
   const [activeVideo, setActiveVideo] = React.useState(false);
 
   return (
-    <div className="mt-5 container mx-auto px-5">
+    <div className="mt-2 lg:mt-5 container mx-auto px-2 lg:px-5">
       <div className="flex items-center">
         <AiFillPlayCircle className="text-xl" />
         <h1 className="font-bold text-lg px-2">Shorts</h1>
@@ -193,8 +193,8 @@ export default function ImageGallery() {
       <div className="mt-2 flex flex-wrap">
         {activeVideo ? (
           <div className="bg-black fixed z-50 inset-0 bg-opacity-75 flex justify-center items-center">
-            <div className="p-10 flex items-start">
-              <div className="order-2 flex flex-col">
+            <div className="p-10 flex flex-col lg:flex-row items-center lg:items-start">
+              <div className="order-2 flex lg:flex-col">
                 <button
                   className="flex flex-col justify-center items-center p-2 text-xs"
                   onClick={() => {
@@ -279,7 +279,7 @@ export default function ImageGallery() {
                 </a>
               </div>
               <div
-                className="relative h-[550px] border-zinc-200 bg-white overflow-hidden rounded-md"
+                className="relative h-[70vh] lg:h-[550px] border-zinc-200 bg-white overflow-hidden rounded-md"
                 style={{
                   aspectRatio: 9 / 16,
                 }}
@@ -317,7 +317,7 @@ export default function ImageGallery() {
               setActiveVideo(e);
             }}
             key={e.id}
-            className="hover:bg-zinc-800 rounded-md w-1/4 p-2 mb-3"
+            className="hover:bg-zinc-800 rounded-md w-1/2 lg:w-1/4 p-1 lg:p-2 mb-3"
           >
             <img
               className="w-full rounded-md object-cover"
