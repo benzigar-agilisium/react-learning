@@ -83,7 +83,7 @@ export default function Template() {
             }}
             className="flex flex-1 h-full"
           ></div>
-          <div className="bg-zinc-800 h-full p-4 px-8 w-full lg:w-1/3 flex flex-col">
+          <div className="bg-zinc-800 h-full p-4 lg:px-8 w-full lg:w-1/3 flex flex-col">
             <div className="flex justify-between items-center text-xl  pb-3  border-b-2 border-zinc-700">
               <div className="flex items-center">
                 <BiCart className="mr-2" />
@@ -103,7 +103,7 @@ export default function Template() {
               ) : null}
               {carts?.map((e) => (
                 <div className="flex my-2 p-2">
-                  <img className="w-1/4 rounded-l-md" src={e.image} alt="" />
+                  <img className="w-1/3 rounded-l-md object-cover" src={e.image} alt="" />
                   <div className="bg-black rounded-r-md p-3 flex-1 flex flex-col justify-between">
                     <div className="flex flex-col">
                       <p className="text-sm font-bold">{e.name}</p>
