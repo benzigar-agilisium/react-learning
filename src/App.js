@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import {
+  Link,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 
-function App() {
+import { Provider } from "react-redux";
+
+import EmiCalculator from "./pages/emi";
+
+import store from "./redux/store";
+import Template from "./pages/template";
+import Home from "./pages/home";
+import ImageGallery from "./pages/images";
+import Shopping from "./pages/shopping";
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+    <Provider store={store}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Template />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/emi" element={<EmiCalculator />} />
+            <Route path="/gallery" element={<ImageGallery />} />
+            <Route path="/shopping" element={<Shopping />} />
+          </Route>
+        </Routes>
+      </Router>
+    </Provider>
+    </>
   );
 }
-
-export default App;
