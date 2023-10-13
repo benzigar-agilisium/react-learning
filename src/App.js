@@ -16,6 +16,7 @@ import Template from "./pages/template";
 import Home from "./pages/home";
 import ImageGallery from "./pages/images";
 import Shopping from "./pages/shopping";
+import Tasks from "./pages/tasks";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
             <Route path="/emi" element={<EmiCalculator />} />
             <Route path="/gallery" element={<ImageGallery />} />
             <Route path="/shopping" element={<Shopping />} />
+            <Route path="/tasks" element={<Tasks />} />
           </Route>
         </Routes>
       </Router>

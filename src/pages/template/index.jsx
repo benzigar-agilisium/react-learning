@@ -103,7 +103,11 @@ export default function Template() {
               ) : null}
               {carts?.map((e) => (
                 <div className="flex my-2 p-2">
-                  <img className="w-1/3 rounded-l-md object-cover" src={e.image} alt="" />
+                  <img
+                    className="w-1/3 rounded-l-md object-cover"
+                    src={e.image}
+                    alt=""
+                  />
                   <div className="bg-black rounded-r-md p-3 flex-1 flex flex-col justify-between">
                     <div className="flex flex-col">
                       <p className="text-sm font-bold">{e.name}</p>
@@ -155,10 +159,14 @@ export default function Template() {
               </Link>
               {location.pathname.includes("emi") ||
               location.pathname.includes("gallery") ||
-              location.pathname.includes("shopping") ? (
+              location.pathname.includes("shopping") ||
+              location.pathname.includes("tasks") ? (
                 <p className="text-blue-300 font-bold text-sm lg:text-xl ml-2">
                   {" "}
                   {location.pathname?.includes("emi") ? "/ Emi" : ""}
+                  {location.pathname?.includes("tasks")
+                    ? "/ Task Management"
+                    : ""}
                   {location.pathname?.includes("gallery") ? "/ Gallery" : ""}
                   {location.pathname?.includes("shopping")
                     ? "/ Shopping Cart"
