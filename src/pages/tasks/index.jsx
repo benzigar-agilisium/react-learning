@@ -376,19 +376,19 @@ export default function Tasks() {
           <p>Add Task</p>
         </button>
       </div>
-      <div className="mt-5 flex items-center justify-between px-3 lg:p-0">
-        <div>
+      <div className="mt-5 flex lg:items-center lg:justify-between px-3 lg:p-0">
+        <div className="w-full lg:w-auto">
           <input
             onChange={(e) => {
               setGlobalFilter(e.target.value);
             }}
             value={globalFilter}
-            className="bg-zinc-800 text-sm text-white px-5 py-2 rounded-full"
+            className="w-full md:w-auto flex-1 bg-zinc-800 text-sm text-white px-5 py-2 rounded-full"
             placeholder="Search..."
             type="text"
           />
         </div>
-        <div className="flex">
+        <div className="w-full flex justify-end">
           <div className="rounded-full flex items-center bg-zinc-800">
             <button
               onClick={() => reactTable.previousPage()}
