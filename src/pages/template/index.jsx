@@ -42,6 +42,15 @@ export default function Template() {
             <div
               onClick={() => {
                 setShowMenu(false);
+                navigate("/tasks");
+              }}
+              className="py-3 px-5 hover:bg-zinc-700"
+            >
+              Task Management
+            </div>
+            <div
+              onClick={() => {
+                setShowMenu(false);
                 navigate("/emi");
               }}
               className="py-3 px-5 hover:bg-zinc-700"

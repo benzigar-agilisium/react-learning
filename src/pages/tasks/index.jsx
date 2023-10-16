@@ -83,10 +83,10 @@ export default function Tasks() {
   return (
     <div className="container mx-auto">
       {showPopUp ? (
-        <div className="fixed inset-0 bg-black z-50 bg-opacity-75 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black z-50 bg-opacity-75 flex justify-center items-end lg:items-center">
           <form
             onSubmit={addTask}
-            className="border-2 border-zinc-800 flex flex-col bg-zinc-800 rounded-md overflow-hidden w-[50vw] h-[80vh]"
+            className="border-2 border-zinc-800 flex flex-col bg-zinc-800 rounded-md overflow-hidden w-full lg:w-[50vw] lg:h-[80vh]"
           >
             <div className="flex items-center justify-between px-4 py-4 bg-zinc-900">
               <div className="flex items-center">
@@ -192,9 +192,9 @@ export default function Tasks() {
           </form>
         </div>
       ) : null}
-      <div className="mt-5 flex items-center w-full justify-between">
+      <div className="mt-5 flex items-center w-full justify-between px-4 lg:p-0">
         <div>
-          <div className="flex items-center font-bold text-2xl">
+          <div className="flex items-center font-bold text-lg lg:text-2xl">
             <BiTask className="mr-2" />
             <h1>Tasks List</h1>
           </div>
@@ -209,8 +209,8 @@ export default function Tasks() {
           <p>Add Task</p>
         </button>
       </div>
-      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm">
-        <table cellPadding={10} className="w-full ">
+      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm overflow-x-scroll">
+        <table cellPadding={10} className="w-full">
           <thead class="bg-zinc-800">
             <tr>
               <th>
@@ -223,7 +223,7 @@ export default function Tasks() {
                   {selectedIds.length === tasks.length ? (
                     <BiCheckboxChecked className="text-2xl" />
                   ) : (
-                    <BiCheckbox className="text-2xl" />
+                    <BiCheckbox className="text-2xl opacity-50" />
                   )}
                 </button>
               </th>
@@ -252,7 +252,7 @@ export default function Tasks() {
                 //     )
                 //   );
                 // }}
-                className="hover:bg-zinc-800 border-b-2 border-black cursor-pointer"
+                className="hover:bg-zinc-800 border-b-2 border-black"
               >
                 <td
                   onClick={() => {
@@ -263,16 +263,18 @@ export default function Tasks() {
                     else setSelectedIds([...selectedIds, e.id]);
                   }}
                 >
-                  <div>
+                  <button>
                     {selectedIds.includes(e.id) ? (
                       <BiCheckboxChecked className="text-2xl" />
                     ) : (
-                      <BiCheckbox className="text-2xl" />
+                      <BiCheckbox className="text-2xl opacity-50" />
                     )}
-                  </div>
+                  </button>
                 </td>
                 <td>{e.id}</td>
-                <td>{format(new Date(e.date), "dd, MMM : hh:mm a")}</td>
+                <td className="min-w-[150px]">
+                  {format(new Date(e.date), "dd, MMM : hh:mm a")}
+                </td>
                 <td>
                   <p title={e.task} className="max-w-[150px] truncate">
                     {e.task || "-"}
@@ -283,10 +285,12 @@ export default function Tasks() {
                     {e.description || "-"}
                   </p>
                 </td>
-                <td>{e.status === "ON-GOING" ? "On-going" : "Done"}</td>
+                <td className="min-w-[100px]">
+                  {e.status === "ON-GOING" ? "On-going" : "Done"}
+                </td>
                 <td>{e.developedBy}</td>
-                <td>
-                  {isDate(e.updatedAt)
+                <td className="min-w-[150px]">
+                  {e.updatedAt
                     ? format(new Date(e.updatedAt), "dd, MMM : hh:mm a")
                     : ""}
                 </td>
@@ -303,7 +307,7 @@ export default function Tasks() {
                       <BiEdit />
                     </button>
                     <button
-                      className="bg-red-700 rounded-full p-1"
+                      className="bg-red-700 hover:bg-red-800 rounded-full p-1"
                       onClick={() => {
                         if (window.confirm("Are you to sure to delete ? "))
                           setTasks(tasks.filter((each) => each.id !== e.id));
@@ -321,12 +325,14 @@ export default function Tasks() {
         <div className="mt-5 flex items-center">
           <button
             onClick={() => {
-              setTasks((tasks) =>
-                tasks.filter((e) => !selectedIds.includes(e.id))
-              );
-              setSelectedIds([]);
+              if (window.confirm("Are you sure to delete all ? ")) {
+                setTasks((tasks) =>
+                  tasks.filter((e) => !selectedIds.includes(e.id))
+                );
+                setSelectedIds([]);
+              }
             }}
-            className="flex items-center bg-red-500 text-sm rounded-full py-2 px-3"
+            className="flex items-center bg-red-500 hover:bg-red-800 text-sm rounded-full py-2 px-3"
           >
             <AiFillDelete className="text-xl mr-1" />
             <p>Delete Selected</p>
