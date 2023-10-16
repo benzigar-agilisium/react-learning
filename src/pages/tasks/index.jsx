@@ -1,8 +1,43 @@
 import React from "react";
 import { BsCheck, BsPlus } from "react-icons/bs";
-import { BiCheckbox, BiCheckboxChecked, BiEdit, BiTask } from "react-icons/bi";
-import { AiFillCloseCircle, AiFillDelete } from "react-icons/ai";
+import {
+  BiArrowToTop,
+  BiCaretLeft,
+  BiCaretRight,
+  BiCheckbox,
+  BiCheckboxChecked,
+  BiEdit,
+  BiSortDown,
+  BiSortUp,
+  BiTask,
+} from "react-icons/bi";
+import {
+  AiFillCloseCircle,
+  AiFillDelete,
+  AiOutlineSortAscending,
+  AiOutlineSortDescending,
+} from "react-icons/ai";
 import { format } from "date-fns";
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  flexRender,
+  useReactTable,
+  getSortedRowModel,
+  SortingState,
+  PaginationState,
+  getPaginationRowModel,
+  sortingFns,
+  getFilteredRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFacetedMinMaxValues,
+} from "@tanstack/react-table";
+import {
+  RankingInfo,
+  rankItem,
+  compareItems,
+} from "@tanstack/match-sorter-utils";
 
 export default function Tasks() {
   const [tasks, setTasks] = React.useState(
@@ -27,14 +62,145 @@ export default function Tasks() {
     assignee: "Benzigar",
   };
 
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const [task, setTask] = React.useState(defaultValue);
 
-  const handleEvent = (event) => {
-    if (event.ctrlKey) {
-      alert("Got it");
-      // setShowPopUp(true)
+  const fuzzySort = (rowA, rowB, columnId) => {
+    let dir = 0;
+    if (rowA.columnFiltersMeta[columnId]) {
+      dir = compareItems(
+        rowA.columnFiltersMeta[columnId]?.itemRank ?? Infinity,
+        rowB.columnFiltersMeta[columnId]?.itemRank ?? Infinity
+      );
     }
+    return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
   };
+
+  const fuzzyFilter = (row, columnId, value, addMeta) => {
+    const itemRank = rankItem(row.getValue(columnId), value);
+    addMeta({
+      itemRank,
+    });
+    return itemRank.passed;
+  };
+
+  const columnHelper = createColumnHelper();
+  const [sorting, setSorting] = React.useState([]);
+
+  const columns = [
+    columnHelper.accessor("id", {
+      header: "No",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("date", {
+      header: "Date",
+      cell: (info) => (
+        <p title={info.getValue()} className="max-w-[150px] truncate">
+          {format(new Date(info.getValue()), "dd, MMM : hh:mm a")}
+        </p>
+      ),
+    }),
+    columnHelper.accessor("task", {
+      header: "Task Name",
+      cell: (info) => (
+        <p title={info.getValue()} className="max-w-[150px] truncate">
+          {info.getValue() || "-"}
+        </p>
+      ),
+    }),
+    columnHelper.accessor("description", {
+      header: "Description",
+      cell: (info) => (
+        <p title={info.getValue()} className="max-w-[150px] truncate">
+          {info.getValue() || "-"}
+        </p>
+      ),
+    }),
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: (info) => (
+        <p title={info.getValue()} className="max-w-[150px] truncate">
+          {info.getValue() === "ON-GOING" ? "On-going" : "Done"}
+        </p>
+      ),
+    }),
+    columnHelper.accessor("developedBy", {
+      header: "Developed By",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("updatedAt", {
+      header: "Updated At",
+      cell: (info) => (
+        <p title={info.getValue()} className="max-w-[150px] truncate">
+          {format(new Date(info.getValue()), "dd, MMM : hh:mm a")}
+        </p>
+      ),
+    }),
+    columnHelper.accessor("assignee", {
+      header: "Assignee",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("action", {
+      header: "Action",
+      cell: (info) => (
+        <div className="text-xl flex items-center">
+          <button
+            className="mr-2"
+            onClick={() => {
+              if (tasks.find((e) => e.id === info.row.getValue("id"))) {
+                setTask(tasks.find((e) => e.id === info.row.getValue("id")));
+                setShowPopUp(true);
+              }
+            }}
+          >
+            <BiEdit />
+          </button>
+          <button
+            className="bg-red-700 hover:bg-red-800 rounded-full p-1"
+            onClick={() => {
+              const id = tasks.find(
+                (e) => e.id === info.row.getValue("id")
+              )?.id;
+              if (
+                tasks.find((e) => e.id === info.row.getValue("id")) &&
+                window.confirm("Are you to sure to delete ? ")
+              )
+                setTasks(tasks.filter((each) => each.id !== id));
+            }}
+          >
+            <AiFillDelete />
+          </button>
+        </div>
+      ),
+    }),
+  ];
+
+  const reactTable = useReactTable({
+    data: tasks,
+    columns: columns,
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      sorting,
+      globalFilter,
+    },
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: fuzzyFilter,
+  });
 
   const addTask = async (e) => {
     e?.preventDefault();
@@ -96,6 +262,7 @@ export default function Tasks() {
               <button>
                 <AiFillCloseCircle
                   onClick={() => {
+                    setTask(defaultValue);
                     setShowPopUp(false);
                   }}
                   className="text-2xl"
@@ -209,6 +376,118 @@ export default function Tasks() {
           <p>Add Task</p>
         </button>
       </div>
+      <div className="mt-5 flex items-center justify-between px-3 lg:p-0">
+        <div>
+          <input
+            onChange={(e) => {
+              setGlobalFilter(e.target.value);
+            }}
+            value={globalFilter}
+            className="bg-zinc-800 text-sm text-white px-5 py-2 rounded-full"
+            placeholder="Search..."
+            type="text"
+          />
+        </div>
+        <div className="flex">
+          <div className="rounded-full flex items-center bg-zinc-800">
+            <button
+              onClick={() => reactTable.previousPage()}
+              style={{
+                opacity: reactTable.getCanPreviousPage() ? 1 : 0.5,
+              }}
+              disabled={!reactTable.getCanPreviousPage()}
+              className="p-2 text-xl hover:bg-black"
+            >
+              <BiCaretLeft className="text-xl" />
+            </button>
+            <p className="border-x-2 border-black font-bold text-xs p-2">
+              {reactTable.getState().pagination.pageIndex + 1} of{" "}
+              {reactTable.getPageCount()}
+            </p>
+            <button
+              style={{
+                opacity: reactTable.getCanNextPage() ? 1 : 0.5,
+              }}
+              onClick={() => reactTable.nextPage()}
+              disabled={!reactTable.getCanNextPage()}
+              className="p-2 text-xl hover:bg-black"
+            >
+              <BiCaretRight />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm overflow-x-scroll mx-3 lg:mx-0">
+        <table cellPadding={10} className="w-full">
+          <thead class="bg-zinc-800">
+            {reactTable.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                <th></th>
+                {headerGroup.headers.map((header) => (
+                  <th key={header.id}>
+                    <div
+                      {...{
+                        className: header.column.getCanSort()
+                          ? "flex items-center cursor-pointer select-none"
+                          : "",
+                        onClick: header.column.getToggleSortingHandler(),
+                      }}
+                    >
+                      {{
+                        asc: <BiSortDown className="mr-1 text-lg" />,
+                        desc: <BiSortUp className="mr-1 text-lg" />,
+                      }[header.column.getIsSorted()] ?? null}
+                      <p>
+                        {" "}
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </p>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {reactTable.getRowModel().rows.map((row) => (
+              <tr
+                className="hover:bg-zinc-800 border-b-2 border-black"
+                key={row.id}
+              >
+                <td
+                  onClick={() => {
+                    if (selectedIds.includes(row.getValue("id")))
+                      setSelectedIds(
+                        selectedIds.filter(
+                          (each) => each !== row.getValue("id")
+                        )
+                      );
+                    else setSelectedIds([...selectedIds, row.getValue("id")]);
+                  }}
+                >
+                  <button>
+                    {selectedIds.includes(row.getValue("id")) ? (
+                      <BiCheckboxChecked className="text-2xl" />
+                    ) : (
+                      <BiCheckbox className="text-2xl opacity-50" />
+                    )}
+                  </button>
+                </td>
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* <div className="my-20"></div>
       <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm overflow-x-scroll">
         <table cellPadding={10} className="w-full">
           <thead class="bg-zinc-800">
@@ -320,9 +599,9 @@ export default function Tasks() {
               </tr>
             ))}
         </table>
-      </div>
+      </div> */}
       {selectedIds?.length > 0 ? (
-        <div className="mt-5 flex items-center">
+        <div className="flex items-center m-4 lg:m-0">
           <button
             onClick={() => {
               if (window.confirm("Are you sure to delete all ? ")) {
@@ -332,9 +611,9 @@ export default function Tasks() {
                 setSelectedIds([]);
               }
             }}
-            className="flex items-center bg-red-500 hover:bg-red-800 text-sm rounded-full py-2 px-3"
+            className="font-bold text-xs flex items-center bg-red-500 hover:bg-red-800 rounded-full py-1 px-2"
           >
-            <AiFillDelete className="text-xl mr-1" />
+            <AiFillDelete className="text-sm mr-1" />
             <p>Delete Selected</p>
           </button>
         </div>
