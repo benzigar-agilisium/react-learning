@@ -14,6 +14,8 @@ export default function Tasks() {
   const [userName, setUserName] = React.useState("Benzigar");
   const [showPopUp, setShowPopUp] = React.useState(false);
 
+  const [selectedIds, setSelectedIds] = React.useState([]);
+
   const defaultValue = {
     checkStatus: false,
     date: new Date(),
@@ -21,8 +23,8 @@ export default function Tasks() {
     description: "",
     status: "ON-GOING",
     developedBy: "Benzigar",
-    updatedBy: "Benzigar",
-    assignee: "MYSELF",
+    updatedAt: new Date(),
+    assignee: "Benzigar",
   };
 
   const [task, setTask] = React.useState(defaultValue);
@@ -43,6 +45,7 @@ export default function Tasks() {
           t.id === task.id
             ? {
                 ...task,
+                updatedAt: new Date(),
               }
             : t
         )
@@ -51,14 +54,16 @@ export default function Tasks() {
       setTasks((tasks) => [
         ...tasks,
         {
-          id: tasks[tasks.length - 1] ? tasks[tasks.length - 1]?.id + 1 : 1,
+          id: tasks[tasks.length - 1]
+            ? tasks.sort((a, b) => a.id - b.id)?.[tasks.length - 1]?.id + 1
+            : 1,
           checkStatus: false,
           date: new Date(),
           task: task.task,
           description: task.description,
-          status: "ON-GOING",
+          status: task.status,
           developedBy: task.developedBy,
-          updatedBy: task.updatedBy,
+          updatedAt: new Date(),
           assignee: task.assignee,
         },
       ]);
@@ -70,8 +75,13 @@ export default function Tasks() {
     if (tasks) localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
+  const isDate = (str) => {
+    const regex = /^\d{4}-\d{1,2}-\d{1,2}$/;
+    return regex.test(str);
+  };
+
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto">
       {showPopUp ? (
         <div className="fixed inset-0 bg-black z-50 bg-opacity-75 flex justify-center items-center">
           <form
@@ -155,9 +165,27 @@ export default function Tasks() {
                 name=""
                 id=""
               />
+              <p className="mt-4">Status : </p>
+              <select
+                onChange={(e) => {
+                  setTask({
+                    ...task,
+                    status: e.target.value,
+                  });
+                }}
+                value={task.status}
+                className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
+                placeholder="Task Name."
+                type="text"
+                name=""
+                id=""
+              >
+                <option value="ON-GOING">Ongoing</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
               <div className="flex justify-end items-center">
                 <button className="bg-white font-bold mt-3 rounded-full py-2 text-black px-3 text-xs">
-                  Add
+                  {task.id ? "Update" : "Add"}
                 </button>
               </div>
             </div>
@@ -175,24 +203,37 @@ export default function Tasks() {
           onClick={() => {
             setShowPopUp(!showPopUp);
           }}
-          className="bg-white text-black hover:bg-zinc-300 flex items-center px-2 py-1 rounded-full mt-5 font-bold text-xs"
+          className="bg-white text-black hover:bg-zinc-300 flex items-center px-2 py-1 rounded-full font-bold text-xs"
         >
           <BsPlus className="text-2xl" />
           <p>Add Task</p>
         </button>
       </div>
-      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5">
+      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm">
         <table cellPadding={10} className="w-full ">
           <thead class="bg-zinc-800">
             <tr>
-              {/* <th></th> */}
+              <th>
+                <button
+                  onClick={() => {
+                    if (selectedIds.length === tasks.length) setSelectedIds([]);
+                    else setSelectedIds(tasks.map((e) => e.id));
+                  }}
+                >
+                  {selectedIds.length === tasks.length ? (
+                    <BiCheckboxChecked className="text-2xl" />
+                  ) : (
+                    <BiCheckbox className="text-2xl" />
+                  )}
+                </button>
+              </th>
               <th>No</th>
               <th>Date</th>
               <th>Task name</th>
               <th>Description</th>
               <th>Status</th>
               <th>Developed By</th>
-              <th>Updated By</th>
+              <th>Updated At</th>
               <th>Assignee</th>
               <th>Action</th>
             </tr>
@@ -202,27 +243,41 @@ export default function Tasks() {
             .sort((a, b) => b.id - a.id)
             ?.map((e, i) => (
               <tr
-                onClick={() => {
-                  setTasks((tasks) =>
-                    tasks.map((each) =>
-                      e.id === each.id
-                        ? { ...each, checkStatus: !each.checkStatus }
-                        : each
-                    )
-                  );
-                }}
+                // onClick={() => {
+                //   setTasks((tasks) =>
+                //     tasks.map((each) =>
+                //       e.id === each.id
+                //         ? { ...each, checkStatus: !each.checkStatus }
+                //         : each
+                //     )
+                //   );
+                // }}
                 className="hover:bg-zinc-800 border-b-2 border-black cursor-pointer"
               >
-                {/* <td>
-                  {e.checkStatus === true ? (
-                    <BiCheckboxChecked className="text-2xl" />
-                  ) : (
-                    <BiCheckbox className="text-2xl" />
-                  )}
-                </td> */}
+                <td
+                  onClick={() => {
+                    if (selectedIds.includes(e.id))
+                      setSelectedIds(
+                        selectedIds.filter((each) => each !== e.id)
+                      );
+                    else setSelectedIds([...selectedIds, e.id]);
+                  }}
+                >
+                  <div>
+                    {selectedIds.includes(e.id) ? (
+                      <BiCheckboxChecked className="text-2xl" />
+                    ) : (
+                      <BiCheckbox className="text-2xl" />
+                    )}
+                  </div>
+                </td>
                 <td>{e.id}</td>
                 <td>{format(new Date(e.date), "dd, MMM : hh:mm a")}</td>
-                <td>{e.task || "-"}</td>
+                <td>
+                  <p title={e.task} className="max-w-[150px] truncate">
+                    {e.task || "-"}
+                  </p>
+                </td>
                 <td>
                   <p title={e.description} className="max-w-[120px] truncate">
                     {e.description || "-"}
@@ -230,7 +285,11 @@ export default function Tasks() {
                 </td>
                 <td>{e.status === "ON-GOING" ? "On-going" : "Done"}</td>
                 <td>{e.developedBy}</td>
-                <td>{e.updatedBy}</td>
+                <td>
+                  {isDate(e.updatedAt)
+                    ? format(new Date(e.updatedAt), "dd, MMM : hh:mm a")
+                    : ""}
+                </td>
                 <td>{e.assignee}</td>
                 <td>
                   <div className="text-xl flex items-center">
@@ -258,6 +317,22 @@ export default function Tasks() {
             ))}
         </table>
       </div>
+      {selectedIds?.length > 0 ? (
+        <div className="mt-5 flex items-center">
+          <button
+            onClick={() => {
+              setTasks((tasks) =>
+                tasks.filter((e) => !selectedIds.includes(e.id))
+              );
+              setSelectedIds([]);
+            }}
+            className="flex items-center bg-red-500 text-sm rounded-full py-2 px-3"
+          >
+            <AiFillDelete className="text-xl mr-1" />
+            <p>Delete Selected</p>
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
