@@ -1,5 +1,5 @@
 import React from "react";
-import { BsCheck, BsPlus } from "react-icons/bs";
+import { BsCheck, BsClock, BsClockFill, BsPlus } from "react-icons/bs";
 import {
   BiArrowToTop,
   BiCaretLeft,
@@ -7,6 +7,7 @@ import {
   BiCheckbox,
   BiCheckboxChecked,
   BiEdit,
+  BiHeart,
   BiSortDown,
   BiSortUp,
   BiTask,
@@ -14,9 +15,12 @@ import {
 import {
   AiFillCloseCircle,
   AiFillDelete,
+  AiFillHeart,
+  AiOutlineHeart,
   AiOutlineSortAscending,
   AiOutlineSortDescending,
 } from "react-icons/ai";
+import { IoMdClose, IoMdCloseCircle, IoMdHeartDislike } from "react-icons/io";
 import { format } from "date-fns";
 import {
   createColumnHelper,
@@ -38,6 +42,8 @@ import {
   rankItem,
   compareItems,
 } from "@tanstack/match-sorter-utils";
+import ShortUniqueId from "short-unique-id";
+import useFavorites from "../../hooks/useFavorites";
 
 export default function Tasks() {
   const [tasks, setTasks] = React.useState(
@@ -46,8 +52,13 @@ export default function Tasks() {
       : []
   );
 
+  const { randomUUID } = new ShortUniqueId({ length: 10 });
+
   const [userName, setUserName] = React.useState("Benzigar");
   const [showPopUp, setShowPopUp] = React.useState(false);
+
+  const { favorites, addToFavorites, ifFavorite, removeFavorite } =
+    useFavorites();
 
   const [selectedIds, setSelectedIds] = React.useState([]);
 
@@ -90,20 +101,24 @@ export default function Tasks() {
   const columns = [
     columnHelper.accessor("id", {
       header: "No",
-      cell: (info) => info.getValue(),
+      cell: (info) => (
+        <p title={info.getValue()} className="max-w-[20px] truncate">
+          {info.getValue() || "-"}
+        </p>
+      ),
     }),
     columnHelper.accessor("date", {
       header: "Date",
       cell: (info) => (
-        <p title={info.getValue()} className="max-w-[150px] truncate">
-          {format(new Date(info.getValue()), "dd, MMM : hh:mm a")}
+        <p title={info.getValue()} className="w-[120px] truncate">
+          {format(new Date(info.getValue()), "dd-MMM hh:mm a")}
         </p>
       ),
     }),
     columnHelper.accessor("task", {
       header: "Task Name",
       cell: (info) => (
-        <p title={info.getValue()} className="max-w-[150px] truncate">
+        <p title={info.getValue()} className="w-[70px] truncate">
           {info.getValue() || "-"}
         </p>
       ),
@@ -111,7 +126,7 @@ export default function Tasks() {
     columnHelper.accessor("description", {
       header: "Description",
       cell: (info) => (
-        <p title={info.getValue()} className="max-w-[150px] truncate">
+        <p title={info.getValue()} className="w-[80px] truncate">
           {info.getValue() || "-"}
         </p>
       ),
@@ -119,20 +134,24 @@ export default function Tasks() {
     columnHelper.accessor("status", {
       header: "Status",
       cell: (info) => (
-        <p title={info.getValue()} className="max-w-[150px] truncate">
-          {info.getValue() === "ON-GOING" ? "On-going" : "Done"}
+        <p title={info.getValue()} className="w-[70px] truncate">
+          {info.getValue() === "ON-GOING" ? "On-going" : "Completed"}
         </p>
       ),
     }),
     columnHelper.accessor("developedBy", {
       header: "Developed By",
-      cell: (info) => info.getValue(),
+      cell: (info) => (
+        <p title={info.getValue()} className="max-w-[100px] truncate">
+          {info.getValue() || "-"}
+        </p>
+      ),
     }),
     columnHelper.accessor("updatedAt", {
       header: "Updated At",
       cell: (info) => (
         <p title={info.getValue()} className="max-w-[150px] truncate">
-          {format(new Date(info.getValue()), "dd, MMM : hh:mm a")}
+          {format(new Date(info.getValue()), "dd-MMM hh:mm a")}
         </p>
       ),
     }),
@@ -171,6 +190,23 @@ export default function Tasks() {
             <AiFillDelete />
           </button>
         </div>
+      ),
+    }),
+    columnHelper.accessor("uniqueId", {
+      header: "",
+      cell: (info) => (
+        <button
+          onClick={() => {
+            if (ifFavorite(info.getValue())) removeFavorite(info.getValue());
+            else addToFavorites(info.getValue());
+          }}
+        >
+          {ifFavorite(info.getValue()) ? (
+            <AiFillHeart className="text-2xl text-red-500" />
+          ) : (
+            <AiOutlineHeart className="text-2xl opacity-50" />
+          )}
+        </button>
       ),
     }),
   ];
@@ -223,6 +259,7 @@ export default function Tasks() {
           id: tasks[tasks.length - 1]
             ? tasks.sort((a, b) => a.id - b.id)?.[tasks.length - 1]?.id + 1
             : 1,
+          // uniqueId : randomUUID(),
           checkStatus: false,
           date: new Date(),
           task: task.task,
@@ -237,6 +274,18 @@ export default function Tasks() {
     setShowPopUp(false);
   };
 
+  const getHeaderWidth = (id) => {
+    if (id === "id") return "10px";
+    if (id === "date") return "120px";
+    if (id === "task") return "100px";
+    if (id === "description") return "100px";
+    if (id === "status") return "90px";
+    if (id === "developedBy") return "60px";
+    if (id === "updatedAt") return "90px";
+    if (id === "assignee") return "60px";
+    return "auto";
+  };
+
   React.useEffect(() => {
     if (tasks) localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
@@ -245,6 +294,16 @@ export default function Tasks() {
     const regex = /^\d{4}-\d{1,2}-\d{1,2}$/;
     return regex.test(str);
   };
+
+  React.useEffect(() => {
+    if (tasks) {
+      const newTaskWithId = tasks.map((each) =>
+        each.uniqueId ? each : { ...each, uniqueId: randomUUID() }
+      );
+      if (JSON.stringify(newTaskWithId) !== JSON.stringify(tasks))
+        setTasks(newTaskWithId);
+    }
+  }, [tasks]);
 
   return (
     <div className="container mx-auto">
@@ -417,190 +476,119 @@ export default function Tasks() {
           </div>
         </div>
       </div>
-      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm overflow-x-scroll mx-3 lg:mx-0">
-        <table cellPadding={10} className="w-full">
-          <thead class="bg-zinc-800">
-            {reactTable.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                <th></th>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id}>
-                    <div
-                      {...{
-                        className: header.column.getCanSort()
-                          ? "flex items-center cursor-pointer select-none"
-                          : "",
-                        onClick: header.column.getToggleSortingHandler(),
+      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm mx-3 lg:mx-0">
+        <div className="w-full overflow-x-scroll">
+          <table cellPadding={10} className="w-full">
+            <thead class="bg-zinc-800">
+              {reactTable.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      style={{
+                        width: getHeaderWidth(header.id),
                       }}
                     >
-                      {{
-                        asc: <BiSortDown className="mr-1 text-lg" />,
-                        desc: <BiSortUp className="mr-1 text-lg" />,
-                      }[header.column.getIsSorted()] ?? null}
-                      <p>
-                        {" "}
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </p>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {reactTable.getRowModel().rows.map((row) => (
-              <tr
-                className="hover:bg-zinc-800 border-b-2 border-black"
-                key={row.id}
-              >
-                <td
-                  onClick={() => {
-                    if (selectedIds.includes(row.getValue("id")))
-                      setSelectedIds(
-                        selectedIds.filter(
-                          (each) => each !== row.getValue("id")
-                        )
-                      );
-                    else setSelectedIds([...selectedIds, row.getValue("id")]);
-                  }}
+                      <div
+                        {...{
+                          className: header.column.getCanSort()
+                            ? "flex items-center cursor-pointer select-none"
+                            : "",
+                          onClick: header.column.getToggleSortingHandler(),
+                        }}
+                      >
+                        <p className="truncate">
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </p>
+                        {{
+                          asc: <BiSortDown className="mr-1 text-lg" />,
+                          desc: <BiSortUp className="mr-1 text-lg" />,
+                        }[header.column.getIsSorted()] ?? (
+                          <BiSortUp className="mr-1 text-lg opacity-0" />
+                        )}
+                      </div>
+                    </th>
+                  ))}
+                  {/* <th></th> */}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {reactTable.getRowModel().rows.map((row) => (
+                <tr
+                  className="hover:bg-zinc-800 border-b-2 border-black"
+                  key={row.id}
                 >
-                  <button>
-                    {selectedIds.includes(row.getValue("id")) ? (
-                      <BiCheckboxChecked className="text-2xl" />
-                    ) : (
-                      <BiCheckbox className="text-2xl opacity-50" />
-                    )}
-                  </button>
-                </td>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                  {/* <td
+                    onClick={() => {
+                      if (ifFavorite(row.getValue("uniqueId")))
+                        removeFavorite(row.getValue("uniqueId"))
+                      else addToFavorites(row.getValue("uniqueId"))
+                    }}
+                  >
+                    
+                  </td> */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      {/* <div className="my-20"></div>
-      <div className="bg-zinc-900 rounded-md overflow-hidden mt-5 text-sm overflow-x-scroll">
-        <table cellPadding={10} className="w-full">
-          <thead class="bg-zinc-800">
-            <tr>
-              <th>
-                <button
-                  onClick={() => {
-                    if (selectedIds.length === tasks.length) setSelectedIds([]);
-                    else setSelectedIds(tasks.map((e) => e.id));
-                  }}
-                >
-                  {selectedIds.length === tasks.length ? (
-                    <BiCheckboxChecked className="text-2xl" />
-                  ) : (
-                    <BiCheckbox className="text-2xl opacity-50" />
-                  )}
-                </button>
-              </th>
-              <th>No</th>
-              <th>Date</th>
-              <th>Task name</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th>Developed By</th>
-              <th>Updated At</th>
-              <th>Assignee</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          {tasks
-            // .map((e, i) => ({ ...e, id: i + 1 }))
-            .sort((a, b) => b.id - a.id)
-            ?.map((e, i) => (
-              <tr
-                // onClick={() => {
-                //   setTasks((tasks) =>
-                //     tasks.map((each) =>
-                //       e.id === each.id
-                //         ? { ...each, checkStatus: !each.checkStatus }
-                //         : each
-                //     )
-                //   );
-                // }}
-                className="hover:bg-zinc-800 border-b-2 border-black"
-              >
-                <td
-                  onClick={() => {
-                    if (selectedIds.includes(e.id))
-                      setSelectedIds(
-                        selectedIds.filter((each) => each !== e.id)
-                      );
-                    else setSelectedIds([...selectedIds, e.id]);
-                  }}
-                >
-                  <button>
-                    {selectedIds.includes(e.id) ? (
-                      <BiCheckboxChecked className="text-2xl" />
-                    ) : (
-                      <BiCheckbox className="text-2xl opacity-50" />
-                    )}
+      {favorites
+        ?.map((each) => tasks.find((e) => e.uniqueId === each))
+        ?.filter((e) => e?.id)?.length > 0 ? (
+        <div className="mt-5 flex items-center w-full justify-between px-5 lg:px-2">
+          <div>
+            <div className="flex items-center font-bold text-lg lg:text-2xl">
+              <BiHeart className="mr-2" />
+              <h1>Favorites List</h1>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      <div className="mt-3 mb-5 flex w-full flex-wrap">
+        {favorites
+          .map((each) => tasks.find((e) => e.uniqueId === each))
+          ?.filter((e) => e?.id)
+          ?.reverse()
+          // ?.sort((a, b) => a.id - b.id)
+          ?.map((each) => (
+            <div className="w-full lg:w-1/4 p-2 lg:p-2 flex flex-col">
+              <button className="bg-zinc-800 text-left hover:bg-zinc-700 transition-all duration-300 p-3 lg:px-5 rounded-md flex-1">
+                <div className="flex justify-between items-center">
+                  <h1 className="font-bold text-sm">{each.task}</h1>
+                  <button
+                    onClick={() => {
+                      removeFavorite(each.uniqueId);
+                    }}
+                  >
+                    <IoMdCloseCircle />
                   </button>
-                </td>
-                <td>{e.id}</td>
-                <td className="min-w-[150px]">
-                  {format(new Date(e.date), "dd, MMM : hh:mm a")}
-                </td>
-                <td>
-                  <p title={e.task} className="max-w-[150px] truncate">
-                    {e.task || "-"}
+                </div>
+                <p className="mt-2 flex items-center text-xs opacity-75">
+                  <BsClockFill className="mr-1" />
+                  <p title={each.date} className="w-[120px] truncate">
+                    {format(new Date(each.date), "dd-MMM hh:mm a")}
                   </p>
-                </td>
-                <td>
-                  <p title={e.description} className="max-w-[120px] truncate">
-                    {e.description || "-"}
-                  </p>
-                </td>
-                <td className="min-w-[100px]">
-                  {e.status === "ON-GOING" ? "On-going" : "Done"}
-                </td>
-                <td>{e.developedBy}</td>
-                <td className="min-w-[150px]">
-                  {e.updatedAt
-                    ? format(new Date(e.updatedAt), "dd, MMM : hh:mm a")
-                    : ""}
-                </td>
-                <td>{e.assignee}</td>
-                <td>
-                  <div className="text-xl flex items-center">
-                    <button
-                      className="mr-2"
-                      onClick={() => {
-                        setTask(e);
-                        setShowPopUp(true);
-                      }}
-                    >
-                      <BiEdit />
-                    </button>
-                    <button
-                      className="bg-red-700 hover:bg-red-800 rounded-full p-1"
-                      onClick={() => {
-                        if (window.confirm("Are you to sure to delete ? "))
-                          setTasks(tasks.filter((each) => each.id !== e.id));
-                      }}
-                    >
-                      <AiFillDelete />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-        </table>
-      </div> */}
-      {selectedIds?.length > 0 ? (
+                </p>
+              </button>
+            </div>
+          ))}
+      </div>
+      {/* {selectedIds?.length > 0 ? (
         <div className="flex items-center m-4 lg:m-0">
           <button
             onClick={() => {
@@ -617,7 +605,7 @@ export default function Tasks() {
             <p>Delete Selected</p>
           </button>
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }
