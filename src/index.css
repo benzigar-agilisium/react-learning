@@ -33,3 +33,7 @@ table th,
 table td {
   text-align: left;
 }
+
+input:focus{
+  outline: none;
+}

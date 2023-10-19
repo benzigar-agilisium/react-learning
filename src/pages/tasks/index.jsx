@@ -1,5 +1,12 @@
 import React from "react";
-import { BsCheck, BsClock, BsClockFill, BsPlus } from "react-icons/bs";
+import {
+  BsCheck,
+  BsClock,
+  BsClockFill,
+  BsFillHeartFill,
+  BsPlus,
+  BsTextParagraph,
+} from "react-icons/bs";
 import {
   BiArrowToTop,
   BiCaretLeft,
@@ -17,12 +24,14 @@ import {
   AiFillCloseCircle,
   AiFillDelete,
   AiFillHeart,
+  AiOutlineDelete,
   AiOutlineHeart,
   AiOutlineSortAscending,
   AiOutlineSortDescending,
 } from "react-icons/ai";
 import { IoMdClose, IoMdCloseCircle, IoMdHeartDislike } from "react-icons/io";
-import { format } from "date-fns";
+import { GrStatusCriticalSmall } from "react-icons/gr";
+import { format, formatDistance } from "date-fns";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -58,6 +67,8 @@ export default function Tasks() {
   const [userName, setUserName] = React.useState("Benzigar");
   const [showPopUp, setShowPopUp] = React.useState(false);
 
+  const [previewTask, setPreviewTask] = React.useState(false);
+
   const { favorites, addToFavorites, ifFavorite, removeFavorite } =
     useFavorites();
 
@@ -69,9 +80,9 @@ export default function Tasks() {
     task: "",
     description: "",
     status: "ON-GOING",
-    developedBy: "Benzigar",
+    developedBy: "",
     updatedAt: new Date(),
-    assignee: "Benzigar",
+    assignee: "",
   };
 
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -119,23 +130,23 @@ export default function Tasks() {
     columnHelper.accessor("task", {
       header: "Task Name",
       cell: (info) => (
-        <p title={info.getValue()} className="w-[70px] truncate">
+        <p title={info.getValue()} className="w-[200px] truncate">
           {info.getValue() || "-"}
         </p>
       ),
     }),
-    columnHelper.accessor("description", {
-      header: "Description",
-      cell: (info) => (
-        <p title={info.getValue()} className="w-[80px] truncate">
-          {info.getValue() || "-"}
-        </p>
-      ),
-    }),
+    // columnHelper.accessor("description", {
+    //   header: "Description",
+    //   cell: (info) => (
+    //     <p title={info.getValue()} className="w-[80px] truncate">
+    //       {info.getValue() || "-"}
+    //     </p>
+    //   ),
+    // }),
     columnHelper.accessor("status", {
       header: "Status",
       cell: (info) => (
-        <p title={info.getValue()} className="w-[70px] truncate">
+        <p title={info.getValue()} className="w-[100px] truncate">
           {info.getValue() === "ON-GOING" ? "On-going" : "Completed"}
         </p>
       ),
@@ -149,52 +160,55 @@ export default function Tasks() {
       ),
     }),
     columnHelper.accessor("updatedAt", {
-      header: "Updated At",
+      header: "Last Updated",
       cell: (info) => (
         <p title={info.getValue()} className="max-w-[150px] truncate">
-          {format(new Date(info.getValue()), "dd-MMM hh:mm a")}
+          {formatDistance(new Date(), new Date(info.getValue()))} ago
         </p>
       ),
     }),
     columnHelper.accessor("assignee", {
       header: "Assignee",
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("action", {
-      header: "Action",
       cell: (info) => (
-        <div className="text-xl flex items-center">
-          <button
-            className="mr-2"
-            onClick={() => {
-              if (tasks.find((e) => e.id === info.row.getValue("id"))) {
-                setTask(tasks.find((e) => e.id === info.row.getValue("id")));
-                setShowPopUp(true);
-              }
-            }}
-          >
-            <BiEdit />
-          </button>
-          <button
-            className="bg-red-700 hover:bg-red-800 rounded-full p-1"
-            onClick={() => {
-              const id = tasks.find(
-                (e) => e.id === info.row.getValue("id")
-              )?.id;
-              if (
-                tasks.find((e) => e.id === info.row.getValue("id")) &&
-                window.confirm("Are you to sure to delete ? ")
-              )
-                setTasks(tasks.filter((each) => each.id !== id));
-            }}
-          >
-            <AiFillDelete />
-          </button>
-        </div>
+        <p className="max-w-[100px] truncate">{info.getValue() || "-"}</p>
       ),
     }),
+    // columnHelper.accessor("action", {
+    //   header: "Action",
+    //   cell: (info) => (
+    //     <div className="text-xl flex items-center">
+    //       <button
+    //         className="mr-2"
+    //         onClick={() => {
+    //           if (tasks.find((e) => e.id === info.row.getValue("id"))) {
+    //             setTask(tasks.find((e) => e.id === info.row.getValue("id")));
+    //             setShowPopUp(true);
+    //           }
+    //         }}
+    //       >
+    //         <BiEdit />
+    //       </button>
+    //       <button
+    //         className="bg-red-700 hover:bg-red-800 rounded-full p-1"
+    //         onClick={() => {
+    //           const id = tasks.find(
+    //             (e) => e.id === info.row.getValue("id")
+    //           )?.id;
+    //           if (
+    //             tasks.find((e) => e.id === info.row.getValue("id")) &&
+    //             window.confirm("Are you to sure to delete ? ")
+    //           )
+    //             setTasks(tasks.filter((each) => each.id !== id));
+    //         }}
+    //       >
+    //         <AiFillDelete />
+    //       </button>
+    //     </div>
+    //   ),
+    // }),
     columnHelper.accessor("uniqueId", {
       header: "",
+      // cell: null,
       cell: (info) => (
         <button
           onClick={() => {
@@ -278,12 +292,12 @@ export default function Tasks() {
   const getHeaderWidth = (id) => {
     if (id === "id") return "10px";
     if (id === "date") return "120px";
-    if (id === "task") return "100px";
+    if (id === "task") return "200px";
     if (id === "description") return "100px";
-    if (id === "status") return "90px";
+    if (id === "status") return "120px";
     if (id === "developedBy") return "60px";
     if (id === "updatedAt") return "90px";
-    if (id === "assignee") return "60px";
+    if (id === "assignee") return "100px";
     return "auto";
   };
 
@@ -306,63 +320,224 @@ export default function Tasks() {
     }
   }, [tasks]);
 
+  React.useEffect(() => {
+    if (previewTask)
+      setTasks(
+        tasks.map((e) =>
+          e.uniqueId === previewTask.uniqueId
+            ? { ...previewTask, updatedAt: new Date() }
+            : e
+        )
+      );
+  }, [previewTask]);
+
+  React.useEffect(() => {
+    const takeAction = (e) => {
+      if (e.key === "Escape") {
+        setPreviewTask(false);
+        setShowPopUp(false);
+        setTask(defaultValue);
+      }
+    };
+
+    document.addEventListener("keydown", takeAction);
+    return () => {
+      document.removeEventListener("keydown", takeAction);
+    };
+  }, []);
+
   return (
     <div className="container mx-auto">
+      {previewTask ? (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 text-white flex justify-center items-end lg:items-center overflow-y-scroll">
+          <div className="h-[80vh] lg:min-h-[80vh] rounded-md w-full lg:w-[60vw] bg-zinc-900 flex flex-col">
+            <div className="flex items-center p-4 px-5 justify-between">
+              <div className="flex-1 flex items-center">
+                <BiTask className="text-3xl" />
+                <input
+                  onChange={(e) => {
+                    setPreviewTask({
+                      ...previewTask,
+                      task: e.target.value,
+                    });
+                  }}
+                  type="text"
+                  value={previewTask.task}
+                  className="w-full bg-transparent focus:outline-none text-white ml-2"
+                />
+              </div>
+              <button
+                className="hover:bg-black rounded-full p-2"
+                onClick={() => {
+                  setPreviewTask(false);
+                }}
+              >
+                <IoMdClose className="text-white text-2xl" />
+              </button>
+            </div>
+            <div className="overflow-y-scroll flex flex-wrap px-5">
+              <div className="w-full lg:w-3/5 mt-2 text-xl mr-4">
+                <div className="w-full flex text-sm">
+                  <BsTextParagraph className="text-3xl" />
+                  <div className="w-full flex flex-col">
+                    <p className="ml-2">Description</p>
+                    <textarea
+                      rows={5}
+                      onChange={(e) => {
+                        setPreviewTask({
+                          ...previewTask,
+                          description: e.target.value,
+                        });
+                      }}
+                      placeholder="Add detailed description"
+                      value={previewTask.description}
+                      className="mt-2 w-full bg-zinc-800 rounded-md px-4 py-4 focus:outline-none"
+                      type="text"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 w-full flex text-sm">
+                  <GrStatusCriticalSmall className="text-xl" />
+                  <div className="flex flex-col">
+                    <p className="ml-2">Status</p>
+                    <select
+                      onChange={(e) => {
+                        setPreviewTask({
+                          ...previewTask,
+                          status: e.target.value,
+                        });
+                      }}
+                      className="bg-zinc-800 focus:outline-none px-2 py-2 rounded-md mt-2"
+                      name=""
+                      id=""
+                      value={previewTask.status}
+                    >
+                      <option value="COMPLETED">Completed</option>
+                      <option value="ON-GOING">On-Going</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 text-sm">
+                <p className="text-sm">Developed By</p>
+                <input
+                  onChange={(e) => {
+                    setPreviewTask({
+                      ...previewTask,
+                      developedBy: e.target.value,
+                    });
+                  }}
+                  placeholder="Mention Name.."
+                  value={previewTask.developedBy}
+                  className="w-full bg-zinc-800 flex items-center px-3 py-2 rounded-md mt-2"
+                ></input>
+                <p className="mt-4 text-sm">Assignee</p>
+                <input
+                  onChange={(e) => {
+                    setPreviewTask({
+                      ...previewTask,
+                      assignee: e.target.value,
+                    });
+                  }}
+                  placeholder="Mention Name.."
+                  value={previewTask.assignee}
+                  className="w-full bg-zinc-800 flex items-center px-3 py-2 rounded-md mt-2"
+                ></input>
+                <p className="mt-4 text-sm">Other Options</p>
+                <button
+                  onClick={() => {
+                    if (ifFavorite(previewTask.uniqueId))
+                      removeFavorite(previewTask.uniqueId);
+                    else addToFavorites(previewTask.uniqueId);
+                  }}
+                  className="w-full bg-zinc-800 flex items-center px-3 py-2 rounded-md mt-2"
+                >
+                  {ifFavorite(previewTask.uniqueId) ? (
+                    <BsFillHeartFill className="mr-2" />
+                  ) : (
+                    <BiHeart className="mr-2" />
+                  )}
+                  {ifFavorite(previewTask.uniqueId) ? (
+                    <p>Remove from Favorites</p>
+                  ) : (
+                    <p>Add to Favorites</p>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm("Are you sure to delete ? ")) {
+                      setTasks(
+                        tasks.filter((e) => e.uniqueId !== previewTask.uniqueId)
+                      );
+                      setPreviewTask(false);
+                    }
+                  }}
+                  className="w-full bg-zinc-800 flex items-center px-3 py-2 rounded-md mt-2"
+                >
+                  <AiOutlineDelete className="mr-2" />
+                  <p>Delete</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {showPopUp ? (
         <div className="fixed inset-0 bg-black z-50 bg-opacity-75 flex justify-center items-end lg:items-center">
           <form
             onSubmit={addTask}
-            className="border-2 border-zinc-800 flex flex-col bg-zinc-800 rounded-md overflow-hidden w-full lg:w-[50vw] lg:h-[80vh]"
+            className="border-2 border-zinc-800 flex flex-col justify-between bg-zinc-800 rounded-md overflow-hidden w-full lg:w-[50vw] lg:h-[80vh]"
           >
-            <div className="flex items-center justify-between px-4 py-4 bg-zinc-900">
-              <div className="flex items-center">
-                <BiTask className="text-xl mr-2" />
-                <h1 className="font-bold">Add new Task</h1>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between px-4 py-4 bg-zinc-900">
+                <div className="flex items-center">
+                  <BiTask className="text-xl mr-2" />
+                  <h1 className="font-bold">Add new Task</h1>
+                </div>
+                <button>
+                  <AiFillCloseCircle
+                    onClick={() => {
+                      setTask(defaultValue);
+                      setShowPopUp(false);
+                    }}
+                    className="text-2xl"
+                  />
+                </button>
               </div>
-              <button>
-                <AiFillCloseCircle
-                  onClick={() => {
-                    setTask(defaultValue);
-                    setShowPopUp(false);
+              <div className="flex flex-col flex-1 overflow-y-scroll p-3 text-sm px-5">
+                <p>Enter Task Name : </p>
+                <input
+                  onChange={(e) => {
+                    setTask({
+                      ...task,
+                      task: e.target.value,
+                    });
                   }}
-                  className="text-2xl"
+                  value={task.task}
+                  className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
+                  placeholder="Task Name."
+                  type="text"
+                  name=""
+                  id=""
+                  autoFocus
                 />
-              </button>
-            </div>
-            <div className="flex flex-col flex-1 overflow-y-scroll p-3 text-sm px-5">
-              <p>Enter Task Name : </p>
-              <input
-                onChange={(e) => {
-                  setTask({
-                    ...task,
-                    task: e.target.value,
-                  });
-                }}
-                value={task.task}
-                className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
-                placeholder="Task Name."
-                type="text"
-                name=""
-                id=""
-                autoFocus
-              />
-              <p className="mt-4">Enter Description : </p>
-              <textarea
-                onChange={(e) => {
-                  setTask({
-                    ...task,
-                    description: e.target.value,
-                  });
-                }}
-                value={task.description}
-                rows={5}
-                className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
-                placeholder="Description."
-                type="text"
-                name=""
-                id=""
-              />
-              <p className="mt-4">Developed by : </p>
+                <p className="mt-4">Enter Description : </p>
+                <textarea
+                  onChange={(e) => {
+                    setTask({
+                      ...task,
+                      description: e.target.value,
+                    });
+                  }}
+                  value={task.description}
+                  rows={5}
+                  className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
+                  placeholder="Description."
+                  type="text"
+                  name=""
+                  id=""
+                />
+                {/* <p className="mt-4">Developed by : </p>
               <input
                 onChange={(e) => {
                   setTask({
@@ -371,13 +546,13 @@ export default function Tasks() {
                   });
                 }}
                 value={task.developedBy}
-                className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
+                className="focus:outline-none bg-zinc-900 rounded-md px-3 py-2 mt-2"
                 placeholder="Task Name."
                 type="text"
                 name=""
                 id=""
-              />
-              <p className="mt-4">Assignee : </p>
+              /> */}
+                {/* <p className="mt-4">Assignee : </p>
               <input
                 onChange={(e) => {
                   setTask({
@@ -386,35 +561,36 @@ export default function Tasks() {
                   });
                 }}
                 value={task.assignee}
-                className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
+                className="focus:outline-none bg-zinc-900 rounded-md px-3 py-2 mt-2"
                 placeholder="Task Name."
                 type="text"
                 name=""
                 id=""
-              />
-              <p className="mt-4">Status : </p>
-              <select
-                onChange={(e) => {
-                  setTask({
-                    ...task,
-                    status: e.target.value,
-                  });
-                }}
-                value={task.status}
-                className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
-                placeholder="Task Name."
-                type="text"
-                name=""
-                id=""
-              >
-                <option value="ON-GOING">Ongoing</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
-              <div className="flex justify-end items-center">
-                <button className="bg-white font-bold mt-3 rounded-full py-2 text-black px-3 text-xs">
-                  {task.id ? "Update" : "Add"}
-                </button>
+              /> */}
+                <p className="mt-4">Status : </p>
+                <select
+                  onChange={(e) => {
+                    setTask({
+                      ...task,
+                      status: e.target.value,
+                    });
+                  }}
+                  value={task.status}
+                  className="bg-zinc-900 rounded-md px-3 py-2 mt-2"
+                  placeholder="Task Name."
+                  type="text"
+                  name=""
+                  id=""
+                >
+                  <option value="ON-GOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
               </div>
+            </div>
+            <div className="flex justify-end items-center p-4">
+              <button className="bg-white font-bold mt-3 rounded-full py-2 text-black px-3 text-xs">
+                {task.id ? "Update" : "Add"}
+              </button>
             </div>
           </form>
         </div>
@@ -526,7 +702,22 @@ export default function Tasks() {
                   key={row.id}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
+                    <td
+                      className="cursor-pointer"
+                      onClick={() => {
+                        if (
+                          cell.getValue() !== undefined &&
+                          !cell.id.includes("uniqueId")
+                        ) {
+                          setPreviewTask(
+                            tasks.find(
+                              (e) => e.uniqueId === row.getValue("uniqueId")
+                            )
+                          );
+                        }
+                      }}
+                      key={cell.id}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
