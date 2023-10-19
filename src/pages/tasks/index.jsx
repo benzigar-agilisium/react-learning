@@ -353,7 +353,7 @@ export default function Tasks() {
       {previewTask ? (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-75 text-white flex justify-center items-end lg:items-center overflow-y-scroll">
           <div className="h-[80vh] lg:min-h-[80vh] rounded-md w-full lg:w-[60vw] bg-zinc-900 flex flex-col">
-            <div className="flex items-center p-4 px-5 justify-between">
+            <div className="flex items-center p-4 pb-2 px-3 lg:px-5 justify-between">
               <div className="flex-1 flex items-center">
                 <BiTask className="text-3xl" />
                 <input
@@ -377,50 +377,58 @@ export default function Tasks() {
                 <IoMdClose className="text-white text-2xl" />
               </button>
             </div>
-            <div className="overflow-y-scroll flex flex-wrap px-5">
-              <div className="w-full lg:w-3/5 mt-2 text-xl mr-4">
-                <div className="w-full flex text-sm">
+            <div className="overflow-y-scroll flex flex-wrap px-3 lg:px-5 pb-5">
+              <div className="w-full lg:w-3/5 text-xl mr-4">
+                <div className="flex">
+                  <div className="bg-zinc-800 items-center text-xs flex px-2 py-1 rounded-full">
+                    <BsClock className="text-sm" />
+                    <p className="ml-1">
+                      {format(new Date(previewTask.date), "dd-MMM hh:mm a")}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 w-full flex text-sm">
                   <BsTextParagraph className="text-3xl" />
                   <div className="w-full flex flex-col">
                     <p className="ml-2">Description</p>
-                    <textarea
-                      rows={5}
-                      onChange={(e) => {
-                        setPreviewTask({
-                          ...previewTask,
-                          description: e.target.value,
-                        });
-                      }}
-                      placeholder="Add detailed description"
-                      value={previewTask.description}
-                      className="mt-2 w-full bg-zinc-800 rounded-md px-4 py-4 focus:outline-none"
-                      type="text"
-                    />
                   </div>
                 </div>
+                <textarea
+                  rows={5}
+                  onChange={(e) => {
+                    setPreviewTask({
+                      ...previewTask,
+                      description: e.target.value,
+                    });
+                  }}
+                  placeholder="Add detailed description"
+                  value={previewTask.description}
+                  className="mt-2 w-full bg-zinc-800 rounded-md px-4 py-4 focus:outline-none text-sm"
+                  type="text"
+                />
                 <div className="mt-4 w-full flex text-sm">
                   <GrStatusCriticalSmall className="text-xl" />
                   <div className="flex flex-col">
                     <p className="ml-2">Status</p>
-                    <select
-                      onChange={(e) => {
-                        setPreviewTask({
-                          ...previewTask,
-                          status: e.target.value,
-                        });
-                      }}
-                      className="bg-zinc-800 focus:outline-none px-2 py-2 rounded-md mt-2"
-                      name=""
-                      id=""
-                      value={previewTask.status}
-                    >
-                      <option value="COMPLETED">Completed</option>
-                      <option value="ON-GOING">On-Going</option>
-                    </select>
                   </div>
                 </div>
+                <select
+                  onChange={(e) => {
+                    setPreviewTask({
+                      ...previewTask,
+                      status: e.target.value,
+                    });
+                  }}
+                  className="bg-zinc-800 focus:outline-none px-2 py-2 rounded-md mt-2 text-sm"
+                  name=""
+                  id=""
+                  value={previewTask.status}
+                >
+                  <option value="COMPLETED">Completed</option>
+                  <option value="ON-GOING">On-Going</option>
+                </select>
               </div>
-              <div className="flex-1 text-sm">
+              <div className="mt-3 lg:m-0 flex-1 text-sm">
                 <p className="text-sm">Developed By</p>
                 <input
                   onChange={(e) => {

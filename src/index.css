@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+.task-list{
+  @apply font-bold text-5xl;
+}
+
+.btn {
+  @apply bg-blue-800 text-sm px-4 py-2 rounded-full
+}
+
 body {
   background-color: black;
   color: white;
