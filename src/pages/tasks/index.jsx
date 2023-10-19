@@ -555,7 +555,15 @@ export default function Tasks() {
           <div>
             <div className="flex items-center font-bold text-lg lg:text-2xl">
               <BiHeart className="mr-2" />
-              <h1>Favorites List</h1>
+              <h1>
+                Favorite List (
+                {
+                  favorites
+                    ?.map((each) => tasks.find((e) => e.uniqueId === each))
+                    ?.filter((e) => e?.id)?.length
+                }
+                )
+              </h1>
             </div>
           </div>
         </div>
@@ -568,9 +576,14 @@ export default function Tasks() {
           // ?.sort((a, b) => a.id - b.id)
           ?.map((each) => (
             <div className="w-full lg:w-1/4 p-2 lg:p-2 flex flex-col">
-              <button className="bg-zinc-800 text-left hover:bg-zinc-700 transition-all duration-300 p-3 lg:px-5 rounded-md flex-1">
-                <div className="flex justify-between items-center">
-                  <h1 className="font-bold text-sm">{each.task}</h1>
+              <button className="bg-gradient-to-br from-zinc-900 to-zinc-900 text-left hover:bg-zinc-700 transition-all duration-300 p-3 lg:px-5 rounded-md flex-1">
+                <div className="border-b-2 pb-2 border-black flex justify-between items-center">
+                  <h1
+                    title={each.task}
+                    className="font-bold text-sm w-full truncate"
+                  >
+                    {each.task}
+                  </h1>
                   <button
                     onClick={() => {
                       removeFavorite(each.uniqueId);
@@ -579,12 +592,23 @@ export default function Tasks() {
                     <IoMdCloseCircle />
                   </button>
                 </div>
-                <p className="mt-2 flex items-center text-xs opacity-75">
-                  <BsClockFill className="mr-1" />
-                  <p title={each.date} className="w-[120px] truncate">
-                    {format(new Date(each.date), "dd-MMM hh:mm a")}
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="flex items-center text-xs opacity-75">
+                    <BsClockFill className="mr-1" />
+                    <p title={each.date} className="w-[120px] truncate">
+                      {format(new Date(each.date), "dd-MMM hh:mm a")}
+                    </p>
                   </p>
-                </p>
+                  <p
+                    className="text-xs bg-black px-2 py-1 rounded-full"
+                    style={{
+                      backgroundColor:
+                        each.status === "COMPLETED" ? "green" : undefined,
+                    }}
+                  >
+                    {each.status === "ON-GOING" ? "OnGoing" : "Completed"}
+                  </p>
+                </div>
               </button>
             </div>
           ))}
