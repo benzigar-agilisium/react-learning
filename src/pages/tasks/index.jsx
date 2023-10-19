@@ -211,6 +211,7 @@ export default function Tasks() {
       // cell: null,
       cell: (info) => (
         <button
+          className="max-w-[50px]"
           onClick={() => {
             if (ifFavorite(info.getValue())) removeFavorite(info.getValue());
             else addToFavorites(info.getValue());
@@ -298,6 +299,7 @@ export default function Tasks() {
     if (id === "developedBy") return "60px";
     if (id === "updatedAt") return "90px";
     if (id === "assignee") return "100px";
+    if (id === "uniqueId") return "80px";
     return "auto";
   };
 
