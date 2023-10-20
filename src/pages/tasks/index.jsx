@@ -249,6 +249,12 @@ export default function Tasks() {
       pagination: {
         pageSize: 10,
       },
+      sorting: [
+        {
+          id: "date",
+          desc: true,
+        },
+      ],
     },
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: fuzzyFilter,
@@ -346,6 +352,15 @@ export default function Tasks() {
     return () => {
       document.removeEventListener("keydown", takeAction);
     };
+  }, []);
+
+  React.useEffect(() => {
+    reactTable.setSorting([
+      {
+        id: "date",
+        desc: true,
+      },
+    ]);
   }, []);
 
   return (

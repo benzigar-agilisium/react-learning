@@ -46,7 +46,7 @@ export default function Template() {
               }}
               className="py-3 px-5 hover:bg-zinc-700"
             >
-              Task Management
+              React Table
             </div>
             <div
               onClick={() => {
@@ -173,9 +173,7 @@ export default function Template() {
                 <p className="text-blue-300 font-bold text-sm lg:text-xl ml-2">
                   {" "}
                   {location.pathname?.includes("emi") ? "/ Emi" : ""}
-                  {location.pathname?.includes("tasks")
-                    ? "/ Task Management"
-                    : ""}
+                  {location.pathname?.includes("tasks") ? "/ React Table" : ""}
                   {location.pathname?.includes("gallery") ? "/ Gallery" : ""}
                   {location.pathname?.includes("shopping")
                     ? "/ Shopping Cart"
