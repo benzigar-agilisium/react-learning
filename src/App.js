@@ -17,23 +17,25 @@ import Home from "./pages/home";
 import ImageGallery from "./pages/images";
 import Shopping from "./pages/shopping";
 import Tasks from "./pages/tasks";
+import Kanban from "./pages/kanban";
 
 export default function App() {
   return (
     <>
-    <Provider store={store}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Template />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/emi" element={<EmiCalculator />} />
-            <Route path="/gallery" element={<ImageGallery />} />
-            <Route path="/shopping" element={<Shopping />} />
-            <Route path="/tasks" element={<Tasks />} />
-          </Route>
-        </Routes>
-      </Router>
-    </Provider>
+      <Provider store={store}>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Template />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/emi" element={<EmiCalculator />} />
+              <Route path="/kanban" element={<Kanban />} />
+              <Route path="/gallery" element={<ImageGallery />} />
+              <Route path="/shopping" element={<Shopping />} />
+              <Route path="/tasks" element={<Tasks />} />
+            </Route>
+          </Routes>
+        </Router>
+      </Provider>
     </>
   );
 }
