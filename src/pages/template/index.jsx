@@ -169,7 +169,8 @@ export default function Template() {
               {location.pathname.includes("emi") ||
               location.pathname.includes("gallery") ||
               location.pathname.includes("shopping") ||
-              location.pathname.includes("tasks") ? (
+              location.pathname.includes("tasks") ||
+              location.pathname.includes("kanban") ? (
                 <p className="text-blue-300 font-bold text-sm lg:text-xl ml-2">
                   {" "}
                   {location.pathname?.includes("emi") ? "/ Emi" : ""}
@@ -177,6 +178,8 @@ export default function Template() {
                   {location.pathname?.includes("gallery") ? "/ Gallery" : ""}
                   {location.pathname?.includes("shopping")
                     ? "/ Shopping Cart"
+                    : location.pathname?.includes("kanban")
+                    ? "/ Kanban Board"
                     : ""}
                 </p>
               ) : null}

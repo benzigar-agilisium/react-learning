@@ -652,7 +652,11 @@ export default function Tasks() {
         <div className="w-full flex justify-end">
           <div className="rounded-full flex items-center bg-zinc-800">
             <button
-              onClick={() => reactTable.previousPage()}
+              onClick={() =>
+                reactTable.getCanPreviousPage()
+                  ? reactTable.previousPage()
+                  : null
+              }
               style={{
                 opacity: reactTable.getCanPreviousPage() ? 1 : 0.5,
               }}
@@ -669,7 +673,9 @@ export default function Tasks() {
               style={{
                 opacity: reactTable.getCanNextPage() ? 1 : 0.5,
               }}
-              onClick={() => reactTable.nextPage()}
+              onClick={() =>
+                reactTable.getCanNextPage() ? reactTable.nextPage() : null
+              }
               disabled={!reactTable.getCanNextPage()}
               className="p-2 text-xl hover:bg-black"
             >

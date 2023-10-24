@@ -30,7 +30,7 @@ export default function Shopping() {
       sub: "Oversized T-Shirts",
       price: 999,
       image:
-        "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1696666520_4307307.jpg?format=webp&w=240&dpr=1.5"
+        "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1696666520_4307307.jpg?format=webp&w=240&dpr=1.5",
     },
     {
       id: 4,
@@ -38,7 +38,7 @@ export default function Shopping() {
       sub: "Oversized T-Shirts",
       price: 999,
       image:
-        "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1687842433_3385347.jpg?format=webp&w=240&dpr=1.5"
+        "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1687842433_3385347.jpg?format=webp&w=240&dpr=1.5",
     },
     {
       id: 5,
@@ -46,7 +46,7 @@ export default function Shopping() {
       sub: "Oversized T-Shirts",
       price: 999,
       image:
-        "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1696059413_1526540.jpg?format=webp&w=240&dpr=1.5"
+        "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1696059413_1526540.jpg?format=webp&w=240&dpr=1.5",
     },
   ]);
 
@@ -81,7 +81,14 @@ export default function Shopping() {
                   </button>
                 )}
               </div>
-              <img className="rounded-md w-full" src={e.image} alt="" />
+              <img
+                className="object-cover rounded-md w-full bg-zinc-950"
+                src={e.image}
+                alt=""
+                style={{
+                  aspectRatio: 360 / 480,
+                }}
+              />
               <h1 className="font-bold text-sm mt-2 w-full truncate">
                 {e.name}
               </h1>

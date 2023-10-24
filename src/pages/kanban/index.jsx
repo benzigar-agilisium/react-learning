@@ -1,5 +1,10 @@
 import React from "react";
-import { AiFillDelete } from "react-icons/ai";
+import {
+  AiFillCaretLeft,
+  AiFillCaretRight,
+  AiFillDelete,
+  AiFillLeftCircle,
+} from "react-icons/ai";
 import { useDetectClickOutside } from "react-detect-click-outside";
 
 import { BsFillKanbanFill, BsPlus } from "react-icons/bs";
@@ -13,6 +18,8 @@ const Board = ({
   deleteBoard = () => {},
   addToBoardTask = () => {},
   updateToBoardTask = () => {},
+  index = 0,
+  moveToIndex = () => {},
 }) => {
   const { randomUUID } = new ShortUniqueId({ length: 10 });
   const [showAdd, setShowAdd] = React.useState(false);
@@ -63,18 +70,18 @@ const Board = ({
                 name: e.target.value,
               });
             }}
-            className="bg-transparent truncate"
+            className="font-bold bg-transparent truncate"
             type="text"
             value={board.name}
           />
-          <button
-            onClick={() => {
-              setShowOptions(true);
-            }}
-            ref={ref}
-            className="rounded-full relative"
-          >
-            <SlOptions className="text-lg" />
+          <div ref={ref} className="rounded-full relative">
+            <button
+              onClick={() => {
+                setShowOptions(true);
+              }}
+            >
+              <SlOptions className="text-lg" />
+            </button>
             {showOptions ? (
               <div className="text-xs w-[200px] z-30 absolute left-0 bg-black rounded-md shadow-xl shadow-zinc-800 flex flex-col">
                 <h1 className="text-center mt-4">Options</h1>
@@ -87,9 +94,29 @@ const Board = ({
                   <AiFillDelete />
                   <p className="ml-1">Delete</p>
                 </button>
+                <button
+                  onClick={() => {
+                    moveToIndex(board.id, index - 1);
+                    setShowOptions(false);
+                  }}
+                  className="mt-1 px-3 py-2 hover:bg-zinc-900 flex items-center"
+                >
+                  <AiFillCaretLeft />
+                  <p className="ml-1">Move Left</p>
+                </button>
+                <button
+                  onClick={() => {
+                    moveToIndex(board.id, index + 1);
+                    setShowOptions(false);
+                  }}
+                  className="mt-1 px-3 py-2 hover:bg-zinc-900 flex items-center"
+                >
+                  <AiFillCaretRight />
+                  <p className="ml-1">Move Right</p>
+                </button>
               </div>
             ) : null}
-          </button>
+          </div>
         </div>
       </div>
       {showAdd ? (
@@ -138,7 +165,11 @@ const Board = ({
       )}
       <Droppable droppableId={board.id} className="mt-2 flex flex-col">
         {(provided, snapshot) => (
-          <div {...provided.droppableProps} ref={provided.innerRef}>
+          <div
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            className="flex-1 h-full"
+          >
             {board.tasks?.map((each, index) => (
               <Draggable key={each.id} draggableId={each.id} index={index}>
                 {(provided, snapshot) => (
@@ -147,9 +178,9 @@ const Board = ({
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     index={index}
-                    className="cursor-pointer text-sm bg-black px-2 py-2 mb-2 rounded-md"
+                    className={`cursor-pointer text-sm bg-black px-2 py-2 mb-2 rounded-md`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between">
                       <p>{each.task}</p>
                       <button
                         onClick={() => {
@@ -177,7 +208,11 @@ const Board = ({
 
 export default function Kanban() {
   const { randomUUID } = new ShortUniqueId({ length: 10 });
-  const [data, setData] = React.useState([]);
+  const [data, setData] = React.useState(
+    localStorage.getItem("KANBAN")
+      ? JSON.parse(localStorage.getItem("KANBAN"))
+      : []
+  );
 
   const [listName, setListName] = React.useState("");
   const [showList, setShowList] = React.useState(
@@ -207,27 +242,70 @@ export default function Kanban() {
   };
 
   const onDragEnd = (result) => {
-    const newItems = data?.find(
-      (e) => e.id === result.source.droppableId
-    )?.tasks;
+    let draggedData = null;
+
+    data.forEach((e) => {
+      e.tasks.map((e) => {
+        if (e.id === result.draggableId) draggedData = e;
+      });
+    });
+
     if (
-      newItems &&
-      result?.source?.index !== undefined &&
-      result?.destination?.index !== undefined
+      draggedData &&
+      result?.source !== null &&
+      result?.destination !== null
     ) {
-      const [removed] = newItems.splice(result.source.index, 1);
-      newItems.splice(result.destination.index, 0, removed);
-      setData(
-        data.map((e) =>
-          e.id === result.source.droppableId ? { ...e, tasks: newItems } : e
-        )
-      );
+      let newData = data;
+
+      // REMOVE
+      newData = newData.map((e) => {
+        if (e.id === result?.source?.droppableId) {
+          return {
+            ...e,
+            tasks: e?.tasks?.filter((e, i) => i !== result?.source?.index),
+          };
+        } else return e;
+      });
+
+      newData = newData.map((e) => {
+        if (e.id === result?.destination?.droppableId) {
+          return {
+            ...e,
+            tasks: [
+              ...e?.tasks?.slice(0, result?.destination?.index),
+              draggedData,
+              ...e?.tasks?.slice(result?.destination?.index, e?.tasks.length),
+            ],
+          };
+        } else return e;
+      });
+
+      setData(newData);
     }
+  };
+
+  const moveToIndex = (id, index) => {
+    const targetData = data.find((e) => e.id === id);
+    if (!targetData) return;
+
+    let removed = data.filter((e) => e.id !== id);
+    console.log(JSON.stringify(removed, null, 4));
+    const final = [
+      ...removed.slice(0, index),
+      targetData,
+      ...removed.slice(index, removed.length),
+    ];
+
+    setData(final);
   };
 
   React.useEffect(() => {
     if (!showList) setListName("");
   }, [showList]);
+
+  React.useEffect(() => {
+    if (data) localStorage.setItem("KANBAN", JSON.stringify(data));
+  }, [data]);
 
   React.useEffect(() => {
     document.addEventListener("keyup", excapeKey);
@@ -243,90 +321,73 @@ export default function Kanban() {
         <h1>Kanban Demo</h1>
       </div>
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable direction="horizontal" droppableId={"ROOT"}>
-          {(provided) => (
-            <div
-              className="flex-1 mt-3 min-w-full flex overflow-x-scroll w-full"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {data?.map((each, index) => (
-                <Draggable key={each.id} draggableId={each.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      index={index}
-                      key={each.id}
-                      className="p-2 rounded-md flex flex-col"
-                    >
-                      <Board
-                        deleteBoard={(id) => {
-                          setData(data.filter((e) => e.id !== id));
-                        }}
-                        board={each}
-                        addToBoardTask={addTaskToBoard}
-                        updateToBoardTask={(id, task) => {
-                          setData(data.map((e) => (e.id === id ? task : e)));
-                        }}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              <div className="p-2 rounded-md flex flex-col">
-                <div className="text-sm w-[200px] bg-zinc-900 rounded-md p-2 flex-1 flex flex-col">
-                  {showList ? (
-                    <div className="flex-1">
-                      <input
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            addToList();
-                            // setShowList(false);
-                          }
-                        }}
-                        onChange={(e) => {
-                          setListName(e.target.value);
-                        }}
-                        value={listName}
-                        type="text"
-                        placeholder="Start typing..."
-                        autoFocus
-                        name=""
-                        className="bg-black rounded-md focus:outline-none px-3 py-2 text-sm w-full"
-                        id=""
-                      />
-                      <div className="text-xs mt-2 flex items-center">
-                        <button className="bg-white rounded-sm px-2 py-1 text-black">
-                          Save
-                        </button>
-                        <button
-                          className="ml-2"
-                          onClick={() => {
-                            setShowList(false);
-                          }}
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setShowList(true);
-                      }}
-                      className="text-sm opacity-75 hover:bg-black py-2 rounded-md px-2 flex items-center"
-                    >
-                      <BsPlus className="text-xl" />
-                      <p>Add another list</p>
-                    </button>
-                  )}
-                </div>
-              </div>
+        <div className="flex-1 mt-3 min-w-full flex overflow-x-scroll w-full">
+          {data?.map((each, index) => (
+            <div key={each.id} className="p-2 rounded-md flex flex-col">
+              <Board
+                moveToIndex={moveToIndex}
+                index={index}
+                deleteBoard={(id) => {
+                  setData(data.filter((e) => e.id !== id));
+                }}
+                board={each}
+                addToBoardTask={addTaskToBoard}
+                updateToBoardTask={(id, task) => {
+                  setData(data.map((e) => (e.id === id ? task : e)));
+                }}
+              />
             </div>
-          )}
-        </Droppable>
+          ))}
+          <div className="p-2 rounded-md flex flex-col">
+            <div className="text-sm w-[200px] bg-zinc-900 rounded-md p-2 flex-1 flex flex-col">
+              {showList ? (
+                <div className="flex-1">
+                  <input
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        addToList();
+                        // setShowList(false);
+                      }
+                    }}
+                    onChange={(e) => {
+                      setListName(e.target.value);
+                    }}
+                    value={listName}
+                    type="text"
+                    placeholder="Start typing..."
+                    autoFocus
+                    name=""
+                    className="bg-black rounded-md focus:outline-none px-3 py-2 text-sm w-full"
+                    id=""
+                  />
+                  <div className="text-xs mt-2 flex items-center">
+                    <button className="bg-white rounded-sm px-2 py-1 text-black">
+                      Save
+                    </button>
+                    <button
+                      className="ml-2"
+                      onClick={() => {
+                        setShowList(false);
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowList(true);
+                  }}
+                  className="text-sm opacity-75 hover:bg-black py-2 rounded-md px-2 flex items-center"
+                >
+                  <BsPlus className="text-xl" />
+                  <p>Add another list</p>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </DragDropContext>
     </div>
   );
